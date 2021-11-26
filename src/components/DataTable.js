@@ -8,6 +8,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 export function RecordTable(props) {
     const records = props.records
@@ -22,19 +23,27 @@ export function RecordTable(props) {
                         <TableCell variant="head"><b>日期</b></TableCell>
                         {bp ? <TableCell variant="head"><b>收缩压</b></TableCell> : ""}
                         {bp ? <TableCell variant="head"><b>舒张压</b></TableCell> : ""}
+                        {bs ? <TableCell variant="head"><b>血糖</b></TableCell> : ""}
+                        <TableCell align="center" variant="head"><b>编辑/删除</b></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {records.map((row, index) => (
-                        <TableRow
-                            key={index}
-                        >
-                            <TableCell size="small">{row.timestamp}</TableCell>
-                            <TableCell size="small">{row.bloodPressureHigh}</TableCell>
-                            <TableCell size="small">{row.bloodPressureLow}</TableCell>
-                            <TableCell align="center"><IconButton onClick={() => { props.deleteElement(index) }}><DeleteIcon color="warning" /></IconButton></TableCell>
-                        </TableRow>
-                    ))}
+                    {records
+                        .sort((r1, r2) => new Date(r1.timestamp).getTime() - new Date(r2.timestamp).getTime())
+                        .map((row, index) => (
+                            <TableRow
+                                key={index}
+                            >
+                                <TableCell size="small">{row.timestamp}</TableCell>
+                                {bp ? <TableCell size="small">{row.bpHigh}</TableCell> : ""}
+                                {bp ? <TableCell size="small">{row.bpLow}</TableCell> : ""}
+                                {bs ? <TableCell size="small">{row.bs}</TableCell> : ""}
+                                <TableCell align="center">
+                                    <IconButton onClick={() => { props.editRecord(index) }}><EditIcon color="primary" /></IconButton>
+                                    <IconButton onClick={() => { props.deleteRecord(index) }}><DeleteIcon color="warning" /></IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                 </TableBody>
             </Table>
         </TableContainer>

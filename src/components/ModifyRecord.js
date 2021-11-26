@@ -2,12 +2,14 @@ import { DateTimePicker } from '@mui/lab'
 import DateAdapter from '@mui/lab/AdapterLuxon'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import { Grid, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { DateTime } from 'luxon'
 import { useState } from 'react'
 
 export function ModifyRecordDialog(props) {
-    const [timestampValue, setTimestampValue] = useState(new Date())
+    const [timestampValue, setTimestampValue] = useState(DateTime.now())
     const [bpLow, setBpLow] = useState(70)
     const [bpHigh, setBpHigh] = useState(120)
+    const [bs, setBs] = useState(6.2)
 
     return (
         <Dialog
@@ -18,7 +20,7 @@ export function ModifyRecordDialog(props) {
             <DialogTitle style={{ fontWeight: 600 }}>添加记录</DialogTitle>
             <DialogContent dividers>
                 <Grid container>
-                    <Grid xs={12} sm={12} md={12}>
+                    <Grid item xs={12} sm={12} md={12}>
                         <LocalizationProvider dateAdapter={DateAdapter}>
                             <DateTimePicker
                                 label="Record Datetime"
@@ -29,7 +31,7 @@ export function ModifyRecordDialog(props) {
                         </LocalizationProvider>
                     </Grid>
 
-                    <Grid xs={12} sm={6} md={6}>
+                    <Grid item xs={12} sm={6} md={6}>
                         <TextField style={{ marginTop: "25px" }}
                             size="small"
                             label="舒张压 (mmHg)"
@@ -39,7 +41,7 @@ export function ModifyRecordDialog(props) {
                         />
                     </Grid>
 
-                    <Grid xs={12} sm={6} md={6}>
+                    <Grid item xs={12} sm={6} md={6}>
                         <TextField style={{ marginTop: "25px" }}
                             size="small"
                             label="收缩压 (mmHg)"
@@ -49,12 +51,15 @@ export function ModifyRecordDialog(props) {
                         />
                     </Grid>
 
-                    <Grid xs={12} sm={6} md={6}>
+                    <Grid item xs={12} sm={6} md={6}>
                         <TextField style={{ marginTop: "25px" }}
                             size="small"
                             label="血糖 (mmol/L)"
-                            value={bpLow}
-                            onChange={(e) => setBpLow(+ e.target.value)}
+                            value={bs}
+                            inputProps={{
+                                step: "0.1"
+                              }}
+                            onChange={(e) => setBs(+ e.target.value)}
                             type="number"
                         />
                     </Grid>
@@ -70,7 +75,10 @@ export function ModifyRecordDialog(props) {
                 <Button
                     variant="contained"
                     color="success"
-                    onClick={() => { props.onClose() }}>
+                    onClick={() => { 
+                        props.onSave(timestampValue, bpHigh, bpLow, bs)
+                        props.onClose()
+                    }}>
                     确定
                 </Button>
             </DialogActions>
