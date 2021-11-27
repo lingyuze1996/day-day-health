@@ -20,11 +20,11 @@ export function RecordTable(props) {
             <Table aria-label="simple table">
                 <TableHead>
                     <TableRow>
-                        <TableCell variant="head"><b>日期</b></TableCell>
-                        {bp ? <TableCell variant="head"><b>收缩压</b></TableCell> : null}
-                        {bp ? <TableCell variant="head"><b>舒张压</b></TableCell> : null}
-                        {bs ? <TableCell variant="head"><b>血糖</b></TableCell> : null}
-                        <TableCell align="center" variant="head"><b>编辑/删除</b></TableCell>
+                        <TableCell size="small" variant="head"><b>Date</b></TableCell>
+                        {bp ? <TableCell size="small" variant="head"><b>SYS</b></TableCell> : null}
+                        {bp ? <TableCell size="small" variant="head"><b>DYA</b></TableCell> : null}
+                        {bs ? <TableCell size="small" variant="head"><b>BS</b></TableCell> : null}
+                        <TableCell size="small" align="center" variant="head"><b>Action</b></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -38,9 +38,9 @@ export function RecordTable(props) {
                                 {bp ? <TableCell size="small">{row.bpHigh}</TableCell> : null}
                                 {bp ? <TableCell size="small">{row.bpLow}</TableCell> : null}
                                 {bs ? <TableCell size="small">{row.bs}</TableCell> : null}
-                                <TableCell align="center">
-                                    <IconButton onClick={() => { props.editRecord(index) }}><EditIcon color="primary" /></IconButton>
-                                    <IconButton onClick={() => { props.deleteRecord(index) }}><DeleteIcon color="warning" /></IconButton>
+                                <TableCell size="small" align="center">
+                                    <IconButton size="small" onClick={() => { props.editRecord(index) }}><EditIcon color="primary" /></IconButton>
+                                    <IconButton size="small" onClick={() => { props.deleteRecord(index) }}><DeleteIcon color="warning" /></IconButton>
                                 </TableCell>
                             </TableRow>
                         ))}

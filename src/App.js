@@ -49,10 +49,10 @@ function App() {
         </header>
 
         <div className="App-body">
-          {/* <Tracker /> */}
+          <Tracker />
         </div>
       </div>
-      <footer className="App-footer"><b>© Copyright - 2021 - Yuze Ling </b></footer>
+      <footer className="App-footer"><b>{`© Copyright - ${new Date().getFullYear()} - Yuze Ling`}</b></footer>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { Container, Grid, Box, Button, FormControlLabel, Checkbox, FormGroup, CircularProgress } from "@mui/material";
 import { useState } from "react";
-import { addRecord, deleteRecord, getRecords } from "../apis/ServiceAPI";
-import { formatLuxonDate } from "../utils/Formatter";
+import { putRecord, deleteRecord, getRecords } from "../apis/ServiceAPI";
+import { RecordLineChart } from "./DataChart";
 import { RecordTable } from "./DataTable";
 import { ModifyRecordDialog } from "./ModifyRecord";
 
@@ -9,23 +9,34 @@ export default function Tracker() {
     const [records, setRecords] = useState([])
     const [dialogOpen, setDialogOpen] = useState(false)
 
-    const [bpSelected, setBpSelected] = useState(false)
+    const [bpSelected, setBpSelected] = useState(true)
     const [bsSelected, setBsSelected] = useState(false)
 
     const [isLoading, setIsLoading] = useState(false)
 
-    const token = localStorage.getItem("id_token")
-    const handleAddRecord = async (datetime, bpHigh, bpLow, bs) => {
-        const timestamp = formatLuxonDate(datetime)
-        const newRecord = { timestamp, bpHigh, bpLow, bs }
+    const [modifyRecordType, setModifyRecordType] = useState("create")
+
+    const [dialogData, setDialogData] = useState({})
+
+    const token = localStorage.getItem("idToken")
+    const handlePutRecord = async (newRecord) => {
         setIsLoading(true)
-        await addRecord(newRecord, token)
-        setRecords((prev) => (
-            [
-                ...prev,
-                newRecord
-            ]
-        ))
+
+        await putRecord(newRecord, token)
+
+        setRecords((recordsPrevious) => {
+            const modifiedRecordIndex = recordsPrevious.findIndex(r => r.recordID === newRecord.recordID)
+            let recordsUpdated = [...recordsPrevious]
+
+            if (modifiedRecordIndex === -1) {
+                recordsUpdated.push(newRecord)
+            } else {
+                recordsUpdated[modifiedRecordIndex] = newRecord
+            }
+
+            return recordsUpdated
+        })
+
         setIsLoading(false)
     }
 
@@ -86,7 +97,15 @@ export default function Tracker() {
                             variant="contained"
                             size="large"
                             color="primary"
-                            onClick={() => { setDialogOpen(true) }}>
+                            onClick={() => {
+                                setModifyRecordType("create")
+                                setDialogData({
+                                    bs: records[0]?.bs,
+                                    bpHigh: records[0]?.bpHigh,
+                                    bpLow: records[0]?.bpLow
+                                })
+                                setDialogOpen(true)
+                            }}>
                             添加数据
                         </Button>
                     </Grid>
@@ -95,16 +114,36 @@ export default function Tracker() {
 
             {
                 !isLoading ?
-                    <Grid container style={{ marginTop: "20px" }}>
-                        <Grid item xs={12} md={6}>
+                    <Grid container style={{ marginTop: "10px" }}>
+                        <Grid item xs={12} md={6} style={{ paddingTop: "10px", paddingBottom: "10px" }}>
                             {
                                 bsSelected || bpSelected ?
-                                    <RecordTable deleteRecord={handleDeleteRecord} records={records} bsSelected={bsSelected} bpSelected={bpSelected} />
+                                    <>
+                                        <h3 style={{ justifyContent: "center", display: "flex" }}>Records Table</h3>
+                                        <RecordTable
+                                            records={records}
+                                            bsSelected={bsSelected}
+                                            bpSelected={bpSelected}
+                                            editRecord={(index) => {
+                                                setDialogData(records[index])
+                                                setModifyRecordType("edit")
+                                                setDialogOpen(true)
+                                            }}
+                                            deleteRecord={handleDeleteRecord} />
+                                    </>
                                     : ""
                             }
                         </Grid>
-                        <Grid item xs={12} md={6} justifyContent="flex-end">
 
+                        <Grid item xs={12} md={6} style={{ paddingTop: "10px", paddingBottom: "10px" }} >
+                            {
+                                (bsSelected || bpSelected) && records.length >= 2 ?
+                                    <>
+                                        <h3 style={{ justifyContent: "center", display: "flex" }}>Records Chart</h3>
+                                        <RecordLineChart records={records} bs={bsSelected} bp={bpSelected} />
+                                    </>
+                                    : ""
+                            }
                         </Grid>
                     </Grid>
                     :
@@ -113,7 +152,12 @@ export default function Tracker() {
                     </Box>
             }
 
-            <ModifyRecordDialog dialogOpen={dialogOpen} onSave={handleAddRecord} onClose={() => setDialogOpen(false)} />
+            <ModifyRecordDialog
+                dialogOpen={dialogOpen}
+                type={modifyRecordType}
+                data={dialogData}
+                onSave={handlePutRecord}
+                onClose={() => setDialogOpen(false)} />
         </Container >
     )
 }

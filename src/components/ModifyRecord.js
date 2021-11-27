@@ -1,10 +1,11 @@
 import { DateTimePicker } from '@mui/lab'
 import DateAdapter from '@mui/lab/AdapterLuxon'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
-import { Grid, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Grid, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Switch, FormControlLabel, FormGroup } from '@mui/material'
 import { DateTime } from 'luxon'
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from 'react'
+import { formatLuxonDate } from '../utils/Formatter'
 
 export function ModifyRecordDialog(props) {
     const [timestampValue, setTimestampValue] = useState(DateTime.now())
@@ -12,6 +13,9 @@ export function ModifyRecordDialog(props) {
     const [bpHigh, setBpHigh] = useState(0)
     const [bs, setBs] = useState(0)
     const [recordID, setRecordID] = useState("")
+
+    const [bpSelected, setBpSelected] = useState(true)
+    const [bsSelected, setBsSelected] = useState(true)
 
     const type = props.type
 
@@ -41,40 +45,48 @@ export function ModifyRecordDialog(props) {
                                 renderInput={(params) => <TextField {...params} />}
                             />
                         </LocalizationProvider>
+
+                        <FormGroup>
+                            <FormControlLabel control={<Switch checked={bpSelected} onChange={(e) => setBpSelected(e.target.checked)} />} label="添加血压" />
+                            <FormControlLabel control={<Switch checked={bsSelected} onChange={(e) => setBsSelected(e.target.checked)} />} label="添加血糖" />
+                        </FormGroup>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={6}>
-                        <TextField style={{ marginTop: "25px" }}
-                            size="small"
-                            label="舒张压 (mmHg)"
-                            value={bpHigh}
-                            onChange={(e) => setBpHigh(+ e.target.value)}
-                            type="number"
-                        />
-                    </Grid>
+                    {bpSelected ?
+                        <Grid item xs={12} sm={6} md={6}>
+                            <TextField style={{ marginTop: "25px" }}
+                                size="small"
+                                label="收缩压 (mmHg)"
+                                value={bpHigh}
+                                onChange={(e) => setBpHigh(+ e.target.value)}
+                                type="number"
+                            />
+                        </Grid> : ""}
 
-                    <Grid item xs={12} sm={6} md={6}>
-                        <TextField style={{ marginTop: "25px" }}
-                            size="small"
-                            label="收缩压 (mmHg)"
-                            value={bpLow}
-                            onChange={(e) => setBpLow(+ e.target.value)}
-                            type="number"
-                        />
-                    </Grid>
+                    {bpSelected ?
+                        <Grid item xs={12} sm={6} md={6}>
+                            <TextField style={{ marginTop: "25px" }}
+                                size="small"
+                                label="舒张压 (mmHg)"
+                                value={bpLow}
+                                onChange={(e) => setBpLow(+ e.target.value)}
+                                type="number"
+                            />
+                        </Grid> : ""}
 
-                    <Grid item xs={12} sm={6} md={6}>
-                        <TextField style={{ marginTop: "25px" }}
-                            size="small"
-                            label="血糖 (mmol/L)"
-                            value={bs}
-                            inputProps={{
-                                step: "0.1"
-                              }}
-                            onChange={(e) => setBs(+ e.target.value)}
-                            type="number"
-                        />
-                    </Grid>
+                    {bsSelected ?
+                        <Grid item xs={12} sm={6} md={6}>
+                            <TextField style={{ marginTop: "25px" }}
+                                size="small"
+                                label="血糖 (mmol/L)"
+                                value={bs}
+                                inputProps={{
+                                    step: "0.1"
+                                }}
+                                onChange={(e) => setBs(+ e.target.value)}
+                                type="number"
+                            />
+                        </Grid> : ""}
                 </Grid>
             </DialogContent>
             <DialogActions>
@@ -87,8 +99,15 @@ export function ModifyRecordDialog(props) {
                 <Button
                     variant="contained"
                     color="success"
-                    onClick={() => { 
-                        props.onSave(recordID, timestampValue, bpHigh, bpLow, bs)
+                    onClick={() => {
+                        const timestamp = formatLuxonDate(timestampValue)
+                        if (bsSelected && bpSelected) {
+                            props.onSave({ recordID, timestamp, bpHigh, bpLow, bs })
+                        } else if (bpSelected) {
+                            props.onSave({ recordID, timestamp, bpHigh, bpLow })
+                        } else if (bsSelected) {
+                            props.onSave({ recordID, timestamp, bs })
+                        } else { }
                         props.onClose()
                     }}>
                     确定
