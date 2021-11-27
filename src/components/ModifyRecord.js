@@ -3,13 +3,25 @@ import DateAdapter from '@mui/lab/AdapterLuxon'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import { Grid, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { DateTime } from 'luxon'
-import { useState } from 'react'
+import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from 'react'
 
 export function ModifyRecordDialog(props) {
     const [timestampValue, setTimestampValue] = useState(DateTime.now())
-    const [bpLow, setBpLow] = useState(70)
-    const [bpHigh, setBpHigh] = useState(120)
-    const [bs, setBs] = useState(6.2)
+    const [bpLow, setBpLow] = useState(0)
+    const [bpHigh, setBpHigh] = useState(0)
+    const [bs, setBs] = useState(0)
+    const [recordID, setRecordID] = useState("")
+
+    const type = props.type
+
+    useEffect(() => {
+        setTimestampValue(props.data.timestamp ? DateTime.fromJSDate(new Date(props.data.timestamp)) : DateTime.now())
+        setBpHigh(props.data.bpHigh ?? 120)
+        setBpLow(props.data.bpLow ?? 70)
+        setBs(props.data.bs ?? 6.2)
+        setRecordID(props.data.recordID ?? uuidv4())
+    }, [props.data])
 
     return (
         <Dialog
@@ -17,7 +29,7 @@ export function ModifyRecordDialog(props) {
             maxWidth="xs"
             open={props.dialogOpen}
             onClose={props.onClose}>
-            <DialogTitle style={{ fontWeight: 600 }}>添加记录</DialogTitle>
+            <DialogTitle style={{ fontWeight: 600 }}>{`${type === "create" ? "添加" : "修改"}记录`}</DialogTitle>
             <DialogContent dividers>
                 <Grid container>
                     <Grid item xs={12} sm={12} md={12}>
@@ -76,7 +88,7 @@ export function ModifyRecordDialog(props) {
                     variant="contained"
                     color="success"
                     onClick={() => { 
-                        props.onSave(timestampValue, bpHigh, bpLow, bs)
+                        props.onSave(recordID, timestampValue, bpHigh, bpLow, bs)
                         props.onClose()
                     }}>
                     确定

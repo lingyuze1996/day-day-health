@@ -21,23 +21,23 @@ export function RecordTable(props) {
                 <TableHead>
                     <TableRow>
                         <TableCell variant="head"><b>日期</b></TableCell>
-                        {bp ? <TableCell variant="head"><b>收缩压</b></TableCell> : ""}
-                        {bp ? <TableCell variant="head"><b>舒张压</b></TableCell> : ""}
-                        {bs ? <TableCell variant="head"><b>血糖</b></TableCell> : ""}
+                        {bp ? <TableCell variant="head"><b>收缩压</b></TableCell> : null}
+                        {bp ? <TableCell variant="head"><b>舒张压</b></TableCell> : null}
+                        {bs ? <TableCell variant="head"><b>血糖</b></TableCell> : null}
                         <TableCell align="center" variant="head"><b>编辑/删除</b></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {records
-                        .sort((r1, r2) => new Date(r1.timestamp).getTime() - new Date(r2.timestamp).getTime())
+                        .sort((r2, r1) => new Date(r1.timestamp).getTime() - new Date(r2.timestamp).getTime())
                         .map((row, index) => (
                             <TableRow
                                 key={index}
                             >
                                 <TableCell size="small">{row.timestamp}</TableCell>
-                                {bp ? <TableCell size="small">{row.bpHigh}</TableCell> : ""}
-                                {bp ? <TableCell size="small">{row.bpLow}</TableCell> : ""}
-                                {bs ? <TableCell size="small">{row.bs}</TableCell> : ""}
+                                {bp ? <TableCell size="small">{row.bpHigh}</TableCell> : null}
+                                {bp ? <TableCell size="small">{row.bpLow}</TableCell> : null}
+                                {bs ? <TableCell size="small">{row.bs}</TableCell> : null}
                                 <TableCell align="center">
                                     <IconButton onClick={() => { props.editRecord(index) }}><EditIcon color="primary" /></IconButton>
                                     <IconButton onClick={() => { props.deleteRecord(index) }}><DeleteIcon color="warning" /></IconButton>
