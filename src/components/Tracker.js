@@ -25,22 +25,27 @@ export default function Tracker() {
     const handlePutRecord = async (newRecord) => {
         setIsLoading(true)
 
-        await putRecord(newRecord, token)
+        try {
+            await putRecord(newRecord, token)
+            setRecords((recordsPrevious) => {
+                const modifiedRecordIndex = recordsPrevious.findIndex(r => r.recordID === newRecord.recordID)
+                let recordsUpdated = [...recordsPrevious]
 
-        setRecords((recordsPrevious) => {
-            const modifiedRecordIndex = recordsPrevious.findIndex(r => r.recordID === newRecord.recordID)
-            let recordsUpdated = [...recordsPrevious]
+                if (modifiedRecordIndex === -1) {
+                    recordsUpdated.push(newRecord)
+                } else {
+                    recordsUpdated[modifiedRecordIndex] = newRecord
+                }
 
-            if (modifiedRecordIndex === -1) {
-                recordsUpdated.push(newRecord)
-            } else {
-                recordsUpdated[modifiedRecordIndex] = newRecord
-            }
-
-            return recordsUpdated
-        })
-
-        setIsLoading(false)
+                return recordsUpdated
+            })
+        } catch (e) {
+            console.log("Upload Data Error: ", e)
+            alert("数据上传异常，请稍后再试！")
+            window.location.reload()
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const handleDeleteRecord = async (index) => {
@@ -48,19 +53,27 @@ export default function Tracker() {
 
         const recordID = recordsDisplay[index]["recordID"]
 
-        await deleteRecord(recordID, token)
-        setRecords((records) => records.filter(r => r.recordID !== recordID))
-
-        setIsLoading(false)
+        try {
+            await deleteRecord(recordID, token)
+            setRecords((records) => records.filter(r => r.recordID !== recordID))
+        } catch (e) {
+            console.log("Delete Data Error: ", e)
+            alert("数据删除异常，请稍后再试！")
+            window.location.reload()
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const handleLoadData = async () => {
         try {
             setIsLoading(true)
             setRecords(await getRecords(token))
-            setIsLoading(false)
         } catch (e) {
+            console.log("Load Data Error: ", e)
             alert("数据加载异常，请稍后再试！")
+            window.location.reload()
+        } finally {
             setIsLoading(false)
         }
     }
