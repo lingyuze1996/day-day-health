@@ -1,5 +1,5 @@
 import { Container, Grid, Box, Button, FormControlLabel, Checkbox, FormGroup, CircularProgress } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { putRecord, deleteRecord, getRecords } from "../apis/ServiceAPI";
 import { RecordLineChart } from "./DataChart";
 import { RecordTable } from "./DataTable";
@@ -7,6 +7,8 @@ import { ModifyRecordDialog } from "./ModifyRecord";
 
 export default function Tracker() {
     const [records, setRecords] = useState([])
+    const [recordsDisplay, setRecordsDisplay] = useState([])
+
     const [dialogOpen, setDialogOpen] = useState(false)
 
     const [bpSelected, setBpSelected] = useState(true)
@@ -19,6 +21,7 @@ export default function Tracker() {
     const [dialogData, setDialogData] = useState({})
 
     const token = localStorage.getItem("idToken")
+
     const handlePutRecord = async (newRecord) => {
         setIsLoading(true)
 
@@ -43,12 +46,10 @@ export default function Tracker() {
     const handleDeleteRecord = async (index) => {
         setIsLoading(true)
 
-        await deleteRecord(records[index]["recordID"], token)
-        setRecords((preState) => {
-            let newState = [...preState]
-            newState.splice(index, 1)
-            return newState
-        })
+        const recordID = recordsDisplay[index]["recordID"]
+
+        await deleteRecord(recordID, token)
+        setRecords((records) => records.filter(r => r.recordID !== recordID))
 
         setIsLoading(false)
     }
@@ -63,6 +64,18 @@ export default function Tracker() {
             setIsLoading(false)
         }
     }
+
+    useEffect(() => {
+        if (bsSelected && bpSelected) {
+            setRecordsDisplay(records)
+        } else if (bsSelected) {
+            setRecordsDisplay(records.filter(r => r.bs !== undefined))
+        } else if (bpSelected) {
+            setRecordsDisplay(records.filter(r => r.bpHigh !== undefined))
+        } else {
+            setRecordsDisplay([])
+        }
+    }, [bsSelected, bpSelected, records])
 
     return (
         <Container maxWidth="xl" >
@@ -116,34 +129,23 @@ export default function Tracker() {
                 !isLoading ?
                     <Grid container style={{ marginTop: "10px" }}>
                         <Grid item xs={12} md={6} style={{ paddingTop: "10px", paddingBottom: "10px" }}>
-                            {
-                                bsSelected || bpSelected ?
-                                    <>
-                                        <h3 style={{ justifyContent: "center", display: "flex" }}>Records Table</h3>
-                                        <RecordTable
-                                            records={records}
-                                            bsSelected={bsSelected}
-                                            bpSelected={bpSelected}
-                                            editRecord={(index) => {
-                                                setDialogData(records[index])
-                                                setModifyRecordType("edit")
-                                                setDialogOpen(true)
-                                            }}
-                                            deleteRecord={handleDeleteRecord} />
-                                    </>
-                                    : ""
-                            }
+                            {bsSelected || bpSelected ?
+                                <RecordTable
+                                    records={recordsDisplay}
+                                    bsSelected={bsSelected}
+                                    bpSelected={bpSelected}
+                                    editRecord={(index) => {
+                                        setDialogData(recordsDisplay[index])
+                                        setModifyRecordType("edit")
+                                        setDialogOpen(true)
+                                    }}
+                                    deleteRecord={handleDeleteRecord} />
+                                : null}
                         </Grid>
 
                         <Grid item xs={12} md={6} style={{ paddingTop: "10px", paddingBottom: "10px" }} >
-                            {
-                                (bsSelected || bpSelected) && records.length >= 2 ?
-                                    <>
-                                        <h3 style={{ justifyContent: "center", display: "flex" }}>Records Chart</h3>
-                                        <RecordLineChart records={records} bs={bsSelected} bp={bpSelected} />
-                                    </>
-                                    : ""
-                            }
+                            {bpSelected ? <RecordLineChart records={records} metrics="bp" /> : null}
+                            {bsSelected ? <RecordLineChart records={records} metrics="bs" /> : null}
                         </Grid>
                     </Grid>
                     :

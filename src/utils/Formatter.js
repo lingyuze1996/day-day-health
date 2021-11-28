@@ -4,7 +4,7 @@ export const formatLuxonDate = (datetime) =>
 export const formatDate = (datetime) => {
     const day = datetime.getDate()
     const month = datetime.getMonth() + 1
-    const year = datetime.getYear() - 100
+    // const year = datetime.getYear() - 100
     const hour = datetime.getHours()
     const minute = datetime.getMinutes()
 
