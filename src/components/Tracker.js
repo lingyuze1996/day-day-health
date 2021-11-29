@@ -20,13 +20,11 @@ export default function Tracker() {
 
     const [dialogData, setDialogData] = useState({})
 
-    const token = localStorage.getItem("idToken")
-
     const handlePutRecord = async (newRecord) => {
         setIsLoading(true)
 
         try {
-            await putRecord(newRecord, token)
+            await putRecord(newRecord)
             setRecords((recordsPrevious) => {
                 const modifiedRecordIndex = recordsPrevious.findIndex(r => r.recordID === newRecord.recordID)
                 let recordsUpdated = [...recordsPrevious]
@@ -54,7 +52,7 @@ export default function Tracker() {
         const recordID = recordsDisplay[index]["recordID"]
 
         try {
-            await deleteRecord(recordID, token)
+            await deleteRecord(recordID)
             setRecords((records) => records.filter(r => r.recordID !== recordID))
         } catch (e) {
             console.log("Delete Data Error: ", e)
@@ -68,7 +66,7 @@ export default function Tracker() {
     const handleLoadData = async () => {
         try {
             setIsLoading(true)
-            setRecords(await getRecords(token))
+            setRecords(await getRecords())
         } catch (e) {
             console.log("Load Data Error: ", e)
             alert("数据加载异常，请稍后再试！")
