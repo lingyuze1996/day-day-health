@@ -1,0 +1,42 @@
+# The workflow deploys static website using aws s3
+name: S3 Deployment
+on:
+  push
+env:
+  BUCKET_NAME : daydayhealth.cf
+  AWS_REGION : ap-east-1
+# permission can be added at job level or workflow level    
+permissions:
+  id-token: write
+  contents: read    # This is required for actions/checkout@v2
+jobs:
+  S3PackageUpload:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v2
+
+      - name: Use node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test node app build
+        run: CI=false npm run build --if-present
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::204633455247:role/GitHubDeploymentRole
+          # role-session-name: samplerolesession
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Sync files to AWS s3
+      - name:  Sync build files to s3
+        run: aws s3 sync build/ s3://${{ env.BUCKET_NAME }}/ --delete
