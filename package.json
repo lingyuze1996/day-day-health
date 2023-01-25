@@ -1,14 +1,15 @@
 {
   "name": "day-day-health",
   "version": "1.0.0",
-  "private": true,
   "dependencies": {
+    "@aws-amplify/ui-react": "^4.3.5",
     "@date-io/luxon": "^2.11.1",
     "@emotion/react": "^11.6.0",
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.0.3",
     "@mui/lab": "^5.0.0-alpha.56",
     "@mui/material": "^5.0.3",
+    "aws-amplify": "^5.0.11",
     "axios": "^0.24.0",
     "luxon": "^2.1.1",
     "react": "^17.0.2",
@@ -41,5 +42,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }

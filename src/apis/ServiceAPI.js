@@ -1,28 +1,35 @@
-import axios from "axios"
+import { Auth } from 'aws-amplify';
+import axios from 'axios';
 
-const DAY_DAY_HEALTH_API_URL = "https://api.daydayhealth.cf/records"
+const DAY_DAY_HEALTH_API_URL = 'https://api.daydayhealth.click/records';
 
 const getRecords = async () => {
-    const response = await axios.get(DAY_DAY_HEALTH_API_URL, {
-        headers: { "Authorization": localStorage.getItem("idToken") }
-    })
-    return response.data
-}
+  const { idToken } = await Auth.currentSession();
+  const response = await axios.get(DAY_DAY_HEALTH_API_URL, {
+    headers: { Authorization: idToken.jwtToken },
+  });
+  return response.data;
+};
 
 const putRecord = async (record) => {
-    const response = await axios.post(DAY_DAY_HEALTH_API_URL, record, {
-        headers: { "Authorization": localStorage.getItem("idToken") }
-    })
+  const { idToken } = await Auth.currentSession();
+  const response = await axios.post(DAY_DAY_HEALTH_API_URL, record, {
+    headers: { Authorization: idToken.jwtToken },
+  });
 
-    return response.data
-}
+  return response.data;
+};
 
 const deleteRecord = async (recordID) => {
-    const response = await axios.delete(`${DAY_DAY_HEALTH_API_URL}?recordID=${recordID}`, {
-        headers: { "Authorization": localStorage.getItem("idToken") }
-    })
+  const { idToken } = await Auth.currentSession();
+  const response = await axios.delete(
+    `${DAY_DAY_HEALTH_API_URL}?recordID=${recordID}`,
+    {
+      headers: { Authorization: idToken.jwtToken },
+    }
+  );
 
-    return response
-}
+  return response;
+};
 
-export { getRecords, putRecord, deleteRecord }
+export { getRecords, putRecord, deleteRecord };
