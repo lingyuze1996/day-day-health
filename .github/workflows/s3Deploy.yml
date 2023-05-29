@@ -1,15 +1,14 @@
 # The workflow deploys static website using aws s3
 name: S3 Deployment
-on:
-  push
+on: push
 env:
-  BUCKET_NAME : daydayhealth.cf
-  AWS_REGION : ap-east-1
-  CLOUDFRONT_DISTRIBUTION : E15ORAK0N1TXRX
-# permission can be added at job level or workflow level    
+  BUCKET_NAME: daydayhealth.cf
+  AWS_REGION: ap-east-1
+  CLOUDFRONT_DISTRIBUTION: E15ORAK0N1TXRX
+# permission can be added at job level or workflow level
 permissions:
   id-token: write
-  contents: read    # This is required for actions/checkout@v2
+  contents: read # This is required for actions/checkout
 jobs:
   S3PackageUpload:
     runs-on: ubuntu-latest
@@ -18,7 +17,7 @@ jobs:
         node-version: [14.x]
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Use node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
@@ -32,16 +31,15 @@ jobs:
         run: CI=false npm run build --if-present
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::204633455247:role/GitHubDeploymentRole
-          # role-session-name: samplerolesession
           aws-region: ${{ env.AWS_REGION }}
 
       # Sync files to AWS s3
       - name: Sync build files to s3
         run: aws s3 sync build/ s3://${{ env.BUCKET_NAME }}/ --delete
-      
+
       # Invalidate cache in AWS Cloudfront
       - name: Invalidate cache in cloudFront
         run: aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION }} --paths "/*"
